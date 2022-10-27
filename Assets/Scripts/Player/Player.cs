@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
     public GameEvent OnEnterCamTrigger;
 
     private bool stateLock = false;
+    private bool isInputFreeze = false;
 
     public enum PlayerStates
     {
@@ -121,21 +122,15 @@ public class Player : MonoBehaviour
     void OnMove(InputValue value)
     {
         //if is dialogue mode, return
-        if (DialogueManager.GetInstance().isDialoguePlaying)
+        if (DialogueManager.GetInstance().isDialoguePlaying || isInputFreeze)
         {
             return;
         }
 
+
         moveInput = value.Get<Vector2>();
 
-        if (moveInput != Vector2.zero)
-        {
-            CurrentState = PlayerStates.WALK;
-            UpdateAnimatorMoveInput();
-        } else
-        {
-            CurrentState = PlayerStates.IDLE;
-        }
+        ResetAnimator();
 
     }
 
@@ -145,11 +140,27 @@ public class Player : MonoBehaviour
         anim.SetFloat("MoveY", moveInput.y);
     }
 
+    private void ResetAnimator()
+    {
+        if (moveInput != Vector2.zero)
+        {
+            CurrentState = PlayerStates.WALK;
+            UpdateAnimatorMoveInput();
+        }
+        else
+        {
+            CurrentState = PlayerStates.IDLE;
+        }
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Slider"))
         {
+
             OnEnterCamTrigger.Raise(this, collision.name);
+            isInputFreeze = true;
+            
         }
     }
 
@@ -158,6 +169,9 @@ public class Player : MonoBehaviour
         if (collision.gameObject.CompareTag("Slider"))
         {
             OnExitCamTrigger.Raise(this, transform.position);
+            moveInput = Vector2.zero;
+            ResetAnimator();
+            isInputFreeze = false;
         }
     }
 }
