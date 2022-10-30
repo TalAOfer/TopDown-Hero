@@ -9,15 +9,18 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anim;
 
-    [Header("OnExitCamTrigger")]
-    public GameEvent OnExitCamTrigger;
-
-    [Header("OnEnterCamTrigger")]
-    public GameEvent OnEnterCamTrigger;
+    public GameEvent OnExitCamTrigger,
+                     OnEnterCamTrigger,
+                     OnEnterPortal,
+                     OnChangeForm;
 
     private bool stateLock = false;
     private bool isInputFreeze = false;
+    private string currentShapeshift;
+    private PlayerForm_SO currentData;
 
+    [SerializeField] PlayerForm_SO DefaultFormData,
+                                   OgreFormData;
     public enum PlayerStates
     {
         IDLE,
@@ -92,7 +95,10 @@ public class Player : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>(); 
+        anim = GetComponent<Animator>();
+        currentShapeshift = "default";
+        currentData = DefaultFormData;
+        moveSpeed = currentData.speed;
     }
 
     private void Update()
@@ -153,14 +159,45 @@ public class Player : MonoBehaviour
         }
     }
 
+    void OnShapeshift(InputValue value)
+    {
+        switch (currentShapeshift)
+        {
+            case "default":
+                currentShapeshift = "ogre";
+                currentData = OgreFormData;
+                break;
+            case "ogre":
+                currentShapeshift = "default";
+                currentData = DefaultFormData;
+                break;
+        }
+
+        moveSpeed = currentData.speed;
+        isInputFreeze = true;
+        moveInput = Vector2.zero;
+        anim.Play("Player_Transform");
+    }
+
+    public void Shapeshift()
+    {
+        OnChangeForm.Raise(this, currentShapeshift);
+        isInputFreeze = false;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Slider"))
         {
 
             OnEnterCamTrigger.Raise(this, collision.name);
-            isInputFreeze = true;
-            
+            isInputFreeze = true;   
+
+        }
+
+        if (collision.gameObject.CompareTag("Portal"))
+        {
+            OnEnterPortal.Raise(this, collision.name);
         }
     }
 

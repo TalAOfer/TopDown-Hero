@@ -6,8 +6,10 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField]
-    private int MaxHealth;
-    private int currentHealth;
+    private Enemy_SO EnemyData;
+
+    private int maxHealth,
+                currentHealth;
 
     [SerializeField]
     private float knockbackAmount = 2.0f;
@@ -17,7 +19,8 @@ public class Enemy : MonoBehaviour
     private Rigidbody2D rb;
     void Start()
     {
-        currentHealth = MaxHealth;
+        maxHealth = EnemyData.hp;
+        currentHealth = EnemyData.hp;
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
     }

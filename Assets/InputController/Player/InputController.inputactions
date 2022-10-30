@@ -49,6 +49,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Shapeshift",
+                    "type": "Button",
+                    "id": "5bf596b0-6257-4fdd-a356-570bf37ecc4a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -186,17 +195,6 @@
                 },
                 {
                     "name": "",
-                    "id": "d56f7ace-2639-4534-b7d5-c3cd56f0d97f",
-                    "path": "<Keyboard>/space",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Submit",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "37d9c3e2-dc3d-4606-b9c6-1d37e3f7eaee",
                     "path": "<Keyboard>/enter",
                     "interactions": "",
@@ -260,6 +258,17 @@
                     "action": "Attack",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "7f923f5f-0ce5-4db1-ab19-2f0497851380",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Shapeshift",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },

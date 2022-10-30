@@ -1,9 +1,5 @@
-using Newtonsoft.Json.Bson;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class PatrolEnemy : MonoBehaviour
 {
@@ -12,7 +8,6 @@ public class PatrolEnemy : MonoBehaviour
 
     private bool once;
     private Animator anim;
-    
     private float distanceFromArrival = 0.1f;
 
     [SerializeField]
@@ -56,14 +51,14 @@ public class PatrolEnemy : MonoBehaviour
         return new Vector3(Random.Range(-1, 1f), Random.Range(-1, 1f)).normalized;
     }
 
-    private float GetRandomTime()
+    private float GetRandomWaitingTime()
     {
         return Random.Range(minWaitTime, maxWaitTime);
     }
 
     private IEnumerator Wait()
     {
-        yield return new WaitForSeconds(GetRandomTime());
+        yield return new WaitForSeconds(GetRandomWaitingTime());
         roamTargetPosition = GetNextRoamingPosition();
         HandleWalkingAnimation();
         once = false;

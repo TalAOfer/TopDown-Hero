@@ -71,6 +71,15 @@ public partial class @InputController : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Shapeshift"",
+                    ""type"": ""Button"",
+                    ""id"": ""5bf596b0-6257-4fdd-a356-570bf37ecc4a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -208,17 +217,6 @@ public partial class @InputController : IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""d56f7ace-2639-4534-b7d5-c3cd56f0d97f"",
-                    ""path"": ""<Keyboard>/space"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Submit"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""37d9c3e2-dc3d-4606-b9c6-1d37e3f7eaee"",
                     ""path"": ""<Keyboard>/enter"",
                     ""interactions"": """",
@@ -282,6 +280,17 @@ public partial class @InputController : IInputActionCollection2, IDisposable
                     ""action"": ""Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7f923f5f-0ce5-4db1-ab19-2f0497851380"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Shapeshift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -872,6 +881,7 @@ public partial class @InputController : IInputActionCollection2, IDisposable
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_Submit = m_Player.FindAction("Submit", throwIfNotFound: true);
+        m_Player_Shapeshift = m_Player.FindAction("Shapeshift", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -948,6 +958,7 @@ public partial class @InputController : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_Submit;
+    private readonly InputAction m_Player_Shapeshift;
     public struct PlayerActions
     {
         private @InputController m_Wrapper;
@@ -957,6 +968,7 @@ public partial class @InputController : IInputActionCollection2, IDisposable
         public InputAction @Look => m_Wrapper.m_Player_Look;
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @Submit => m_Wrapper.m_Player_Submit;
+        public InputAction @Shapeshift => m_Wrapper.m_Player_Shapeshift;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -981,6 +993,9 @@ public partial class @InputController : IInputActionCollection2, IDisposable
                 @Submit.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSubmit;
                 @Submit.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSubmit;
                 @Submit.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSubmit;
+                @Shapeshift.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShapeshift;
+                @Shapeshift.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShapeshift;
+                @Shapeshift.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShapeshift;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -1000,6 +1015,9 @@ public partial class @InputController : IInputActionCollection2, IDisposable
                 @Submit.started += instance.OnSubmit;
                 @Submit.performed += instance.OnSubmit;
                 @Submit.canceled += instance.OnSubmit;
+                @Shapeshift.started += instance.OnShapeshift;
+                @Shapeshift.performed += instance.OnShapeshift;
+                @Shapeshift.canceled += instance.OnShapeshift;
             }
         }
     }
@@ -1161,6 +1179,7 @@ public partial class @InputController : IInputActionCollection2, IDisposable
         void OnLook(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
         void OnSubmit(InputAction.CallbackContext context);
+        void OnShapeshift(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

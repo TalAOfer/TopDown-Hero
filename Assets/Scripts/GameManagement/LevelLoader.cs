@@ -7,7 +7,7 @@ public class LevelLoader : MonoBehaviour
 
     public void FadeReloadLevel(float waitingTime)
     {
-           StartCoroutine(LoadLevel(SceneManager.GetActiveScene().buildIndex, waitingTime)); 
+        StartCoroutine(LoadLevel(SceneManager.GetActiveScene().buildIndex, waitingTime));
     }
 
     public void ReloadLevel(float waitingTime)
@@ -34,6 +34,11 @@ public class LevelLoader : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
+        SceneManager.LoadScene(levelIndex);
+    }
+
+    public void LoadLevelWithIndex(int levelIndex) 
+    {
         SceneManager.LoadScene(levelIndex);
     }
 }
