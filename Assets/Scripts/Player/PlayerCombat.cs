@@ -167,6 +167,13 @@ public class PlayerCombat : MonoBehaviour
         lastAttackEndedIn = Time.time;
     }
 
+    public void EndAttack()
+    {
+        playerController.ExitAttackMode();
+        canAttack = true;
+        lastAttackEndedIn = Time.time;
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
