@@ -8,6 +8,7 @@ using static Player;
 public class PlayerCombat : MonoBehaviour
 {
     private int currAttack = 1;
+    public GameEvent OnShakeCamera;
 
     [SerializeField]
     PlayerForm_SO DefaultFormData,
@@ -131,10 +132,18 @@ public class PlayerCombat : MonoBehaviour
 
     public void HandleEnemyHits()
     {
+        if (isRooted)
+        {
+            OnShakeCamera.Raise();
+        }
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
 
         foreach (Collider2D enemy in hitEnemies)
         {
+            if (enemy.isTrigger)
+            {
+                continue;
+            }
             enemy.GetComponent<Enemy>().TakeDamage(playerDamage, transform.position);
         }
     }

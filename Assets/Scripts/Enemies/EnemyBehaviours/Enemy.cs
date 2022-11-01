@@ -32,6 +32,7 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(int damage, Vector3 playerPosition)
     {
+        Debug.Log(damage);
         currentHealth -= damage;
 
         anim.SetTrigger("Hurt");
