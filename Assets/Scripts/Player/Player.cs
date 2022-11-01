@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
                      OnEnterPortal,
                      OnChangeForm;
 
-    private bool stateLock = false;
+    public bool stateLock = false;
     private bool isInputFreeze = false;
     private string currentShapeshift;
     private PlayerForm_SO currentData;
@@ -32,7 +32,8 @@ public class Player : MonoBehaviour
         ATTACK2_RIGHT,
         ATTACK2_LEFT,
         ATTACK2_UP,
-        ATTACK2_DOWN
+        ATTACK2_DOWN,
+        TRANSFORM
     }
 
     public PlayerStates CurrentState
@@ -82,6 +83,10 @@ public class Player : MonoBehaviour
                         anim.Play("Player_Attack_2_Down");
                         stateLock = true;
                         break;
+                    case PlayerStates.TRANSFORM:
+                        anim.Play("Player_Transform");
+                        stateLock = true;
+                        break;
                 }
             }
 
@@ -108,13 +113,17 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!isInputFreeze) {
             rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
+            ResetAnimator();
+        }
     }
 
     public void ExitAttackMode()
     {
         stateLock = false;
-
+        DisableInputFreeze();
+        
         if (moveInput != Vector2.zero)
         {
             CurrentState = PlayerStates.WALK;
@@ -127,17 +136,7 @@ public class Player : MonoBehaviour
 
     void OnMove(InputValue value)
     {
-        //if is dialogue mode, return
-        if (DialogueManager.GetInstance().isDialoguePlaying || isInputFreeze)
-        {
-            return;
-        }
-
-
         moveInput = value.Get<Vector2>();
-
-        ResetAnimator();
-
     }
 
     public void UpdateAnimatorMoveInput()
@@ -161,6 +160,13 @@ public class Player : MonoBehaviour
 
     void OnShapeshift(InputValue value)
     {
+        if (isInputFreeze)
+        {
+            return;
+        }
+
+        CurrentState = PlayerStates.TRANSFORM;
+
         switch (currentShapeshift)
         {
             case "default":
@@ -174,14 +180,26 @@ public class Player : MonoBehaviour
         }
 
         moveSpeed = currentData.speed;
-        isInputFreeze = true;
-        moveInput = Vector2.zero;
-        anim.Play("Player_Transform");
+        EnableInputFreeze();
     }
 
     public void Shapeshift()
     {
         OnChangeForm.Raise(this, currentShapeshift);
+        DisableInputFreeze();
+        stateLock = false;
+        //Set Player to idle down
+        anim.SetFloat("MoveX", 0);
+        anim.SetFloat("MoveY", 0);
+    }
+
+    public void EnableInputFreeze()
+    {
+        isInputFreeze = true;
+    }
+
+    public void DisableInputFreeze()
+    {
         isInputFreeze = false;
     }
 
@@ -191,7 +209,7 @@ public class Player : MonoBehaviour
         {
 
             OnEnterCamTrigger.Raise(this, collision.name);
-            isInputFreeze = true;   
+            EnableInputFreeze();   
 
         }
 
@@ -206,9 +224,8 @@ public class Player : MonoBehaviour
         if (collision.gameObject.CompareTag("Slider"))
         {
             OnExitCamTrigger.Raise(this, transform.position);
-            moveInput = Vector2.zero;
             ResetAnimator();
-            isInputFreeze = false;
+            DisableInputFreeze();
         }
     }
 }

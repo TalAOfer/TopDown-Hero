@@ -10,7 +10,10 @@ public class PlayerCombat : MonoBehaviour
     private int currAttack = 1;
 
     [SerializeField]
-    private int playerDamage = 20;
+    PlayerForm_SO DefaultFormData,
+                  OgreFormData;
+
+    private PlayerForm_SO currentData;
 
     [SerializeField]
     private LayerMask enemyLayers;
@@ -29,6 +32,10 @@ public class PlayerCombat : MonoBehaviour
     private float attackRange = 0.5f;
 
     private Vector2 attackInput;
+    private bool isRooted;
+
+    private int playerDamage = 20;
+
     private Vector3 attackPointRight = new (0.75f, 0, 0),
                     attackPointLeft = new (-0.75f, 0.15f, 0),
                     attackPointUp = new (0, 0.75f, 0),
@@ -37,6 +44,9 @@ public class PlayerCombat : MonoBehaviour
     private void Awake()
     {   
         playerController = gameObject.GetComponent<Player>();
+        currentData = DefaultFormData;
+        isRooted = currentData.isStuckWhenAttacking;
+        playerDamage = currentData.damage;
     }
 
     void Update()
@@ -69,15 +79,24 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
+    public void UpdateData(Component sender, object data)
+    {
+        switch ((string) data)
+        {
+            case "ogre":
+                currentData = OgreFormData;
+                break;
+            case "default":
+                currentData = DefaultFormData;
+                break;
+        }
+        playerDamage = currentData.damage;
+        isRooted = currentData.isStuckWhenAttacking;
+        canAttack = true;
+    }
 
     private void OnAttack(InputValue value)
     {
-        //if is dialogue mode, return
-        if (DialogueManager.GetInstance().isDialoguePlaying)
-        {
-            return;
-        }
-
         attackInput = value.Get<Vector2>();
     }
 
@@ -86,13 +105,18 @@ public class PlayerCombat : MonoBehaviour
         //If Enough time passed since last attack, attack
         if (Time.time >= lastAttackEndedIn && canAttack)
         {
+            if (isRooted)
+            {
+                playerController.EnableInputFreeze();
+            }
+
             canAttack = false;
             //perform attack1
             if (currAttack == 1)
             {
                 currAttack = 2;
                 HandleAttack1Direction();
-                HandleEnemyHits();
+                //HandleEnemyHits();
             }
 
             //perform attack2
@@ -100,7 +124,7 @@ public class PlayerCombat : MonoBehaviour
             {
                 currAttack = 1;
                 HandleAttack2Direction();
-                HandleEnemyHits();
+                //HandleEnemyHits();
             }
         }
     }

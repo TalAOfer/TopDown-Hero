@@ -14,3 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 20
   speed: 4
+  isStuckWhenAttacking: 0
+  attackPointRight: {x: 0, y: 0, z: 0}
+  attackPointLeft: {x: 0, y: 0, z: 0}
+  attackPointUp: {x: 0, y: 0, z: 0}
+  attackPointDown: {x: 0, y: 0, z: 0}

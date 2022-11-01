@@ -39,7 +39,7 @@ public class Enemy : MonoBehaviour
         //HitDirection
         Vector2 direction = (this.transform.position - playerPosition).normalized;
         //Apply Knockback
-        force = (direction * knockbackAmount);
+        force = (direction * knockbackAmount * (damage / 2));
         rb.AddForce(force, ForceMode2D.Impulse);
 
         if (currentHealth < 0) {
