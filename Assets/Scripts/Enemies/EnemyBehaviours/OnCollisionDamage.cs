@@ -4,11 +4,20 @@ using UnityEngine;
 
 public class OnCollisionDamage : MonoBehaviour
 {
+    private Enemy enemy;
+    private void Start()
+    {
+        enemy = GetComponentInParent<Enemy>();
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (!enemy.isDead)
         {
-            collision.gameObject.GetComponent<PlayerHealth>().TakeDamage(1);
+            if (collision.gameObject.CompareTag("Player"))
+            {
+                collision.gameObject.GetComponentInParent<PlayerHealth>().TakeDamage(1, transform.position);
+            }
         }
     }
 }

@@ -6,6 +6,8 @@ public class PatrolEnemy : MonoBehaviour
     private Vector3 startingPosition;
     private Vector3 roamTargetPosition;
 
+    private Enemy enemy;
+
     private bool once;
     private Animator anim;
     private float distanceFromArrival = 0.1f;
@@ -24,6 +26,8 @@ public class PatrolEnemy : MonoBehaviour
     private void Start()
     {
         anim = GetComponent<Animator>();
+        enemy = GetComponent<Enemy>();
+
         startingPosition = transform.position;
         roamTargetPosition = GetNextRoamingPosition();
         HandleWalkingAnimation();
@@ -31,6 +35,10 @@ public class PatrolEnemy : MonoBehaviour
 
     private void Update()
     {
+        if (enemy.isDead)
+        {
+            return;
+        }
         transform.position = Vector3.MoveTowards(transform.position, roamTargetPosition, roamSpeed * Time.deltaTime);
         if (Vector3.Distance(transform.position, roamTargetPosition) < distanceFromArrival
             && !once)
@@ -66,6 +74,11 @@ public class PatrolEnemy : MonoBehaviour
 
     private void HandleWalkingAnimation ()
     {
+        if (enemy.isDead)
+        {
+            return;
+        }
+
         float xDistance = roamTargetPosition.x - transform.position.x;
         float yDistance = roamTargetPosition.y - transform.position.y;
         float xAbsDis = Mathf.Abs(xDistance);
@@ -100,7 +113,12 @@ public class PatrolEnemy : MonoBehaviour
 
     private void HandleIdleAnimation()
     {
-        switch(newDirection)
+        if (enemy.isDead)
+        {
+            return;
+        }
+
+        switch (newDirection)
         {
             case "left":
                 anim.Play("Idle_Left");

@@ -32,7 +32,7 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField]
     private float attackRange = 0.5f;
 
-    private Vector2 attackInput;
+    public Vector2 attackInput;
     private bool isRooted;
 
     private int playerDamage = 20;
@@ -104,7 +104,7 @@ public class PlayerCombat : MonoBehaviour
     private void PerformAttack()
     {
         //If Enough time passed since last attack, attack
-        if (Time.time >= lastAttackEndedIn && canAttack)
+        if (Time.time >= lastAttackEndedIn + attackResetDelay && canAttack)
         {
             if (isRooted)
             {
@@ -132,6 +132,7 @@ public class PlayerCombat : MonoBehaviour
 
     public void HandleEnemyHits()
     {
+
         if (isRooted)
         {
             OnShakeCamera.Raise();
@@ -140,11 +141,11 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (Collider2D enemy in hitEnemies)
         {
-            if (enemy.isTrigger)
+            if (!enemy.isTrigger)
             {
                 continue;
             }
-            enemy.GetComponent<Enemy>().TakeDamage(playerDamage, transform.position);
+            enemy.GetComponentInParent<Enemy>().TakeDamage(playerDamage, transform.position);
         }
     }
 

@@ -16,7 +16,6 @@ GameObject:
   - component: {fileID: 4434589336532707216}
   - component: {fileID: 4434589336532707231}
   - component: {fileID: 4434589336532707229}
-  - component: {fileID: 1470190477}
   m_Layer: 3
   m_Name: Snail
   m_TagString: Untagged
@@ -172,6 +171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnemyData: {fileID: 11400000, guid: 7b90121149a3e634e822cd15da6ee573, type: 2}
+  isDead: 0
   knockbackAmount: 1
 --- !u!114 &4434589336532707231
 MonoBehaviour:
@@ -202,22 +202,6 @@ MonoBehaviour:
   roamSpeed: 1
   minWaitTime: 2
   maxWaitTime: 4
---- !u!70 &1470190477
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4434589336532707220}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 0.7, y: 0.7}
-  m_Direction: 0
 --- !u!1 &4434589336780474087
 GameObject:
   m_ObjectHideFlags: 0

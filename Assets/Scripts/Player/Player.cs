@@ -5,22 +5,53 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
-    private Vector2 moveInput;
+    //Setup
     private Rigidbody2D rb;
     private Animator anim;
+    private PlayerCombat playerCombat;
 
-    public GameEvent OnExitCamTrigger,
-                     OnEnterCamTrigger,
-                     OnEnterPortal,
-                     OnChangeForm;
+    [Header("Events")]
+    public GameEvent OnExitCamTrigger;
+    public GameEvent OnEnterCamTrigger;
+    public GameEvent OnEnterPortal;
+    public GameEvent OnChangeForm;
+    public GameEvent OnExitDash;
+    public GameEvent OnExitKnockback;
 
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 5f;
+    private Vector2 moveInput;
+    private string facingDirection;
+    
+    ////Dash Vars
+    private bool isDashing = false;
+    private bool canDash = true;
+    [SerializeField] private float dashingPower = 24f;
+    [SerializeField] private float dashingTime = 0.2f;
+    [SerializeField] private float dashingCooldown = 1f;
+
+    ////Knockback Vars
+    private Vector2 knockbackForce;
+    private bool isKnockedback = false;
+    [SerializeField] private float knockbackAmount = 2f;
+    [SerializeField] private float knockbackTime = 0.2f;
+
+
+    [Header("Locks")]
     public bool stateLock = false;
     private bool isInputFreeze = false;
-    private string currentShapeshift;
-    private PlayerForm_SO currentData;
 
-    [SerializeField] PlayerForm_SO DefaultFormData,
-                                   OgreFormData;
+
+    [Header("Shapeshifting")]
+    [SerializeField] PlayerForm_SO DefaultFormData;
+    [SerializeField] PlayerForm_SO OgreFormData;
+
+    private PlayerForm_SO currentData;
+    private string currentShapeshift;
+    [SerializeField] private AnimationCurve dashCurve;
+    
+
+    //Player States
     public enum PlayerStates
     {
         IDLE,
@@ -33,6 +64,14 @@ public class Player : MonoBehaviour
         ATTACK2_LEFT,
         ATTACK2_UP,
         ATTACK2_DOWN,
+        DASH_RIGHT,
+        DASH_LEFT,
+        DASH_UP,
+        DASH_DOWN,
+        HURT_RIGHT,
+        HURT_LEFT,
+        HURT_UP,
+        HURT_DOWN,
         TRANSFORM
     }
 
@@ -83,6 +122,38 @@ public class Player : MonoBehaviour
                         anim.Play("Player_Attack_2_Down");
                         stateLock = true;
                         break;
+                    case PlayerStates.DASH_RIGHT:
+                        anim.Play("Player_Dash_Right");
+                        stateLock = true;
+                        break;
+                    case PlayerStates.DASH_LEFT:
+                        anim.Play("Player_Dash_Left");
+                        stateLock = true;
+                        break;
+                    case PlayerStates.DASH_UP:
+                        anim.Play("Player_Dash_Up");
+                        stateLock = true;
+                        break;
+                    case PlayerStates.DASH_DOWN:
+                        anim.Play("Player_Dash_Down");
+                        stateLock = true;
+                        break;
+                    case PlayerStates.HURT_RIGHT:
+                        anim.Play("Player_Hurt_Right");
+                        stateLock = true;
+                        break;
+                    case PlayerStates.HURT_LEFT:
+                        anim.Play("Player_Hurt_Left");
+                        stateLock = true;
+                        break;
+                    case PlayerStates.HURT_UP:
+                        anim.Play("Player_Hurt_Up");
+                        stateLock = true;
+                        break;
+                    case PlayerStates.HURT_DOWN:
+                        anim.Play("Player_Hurt_Down");
+                        stateLock = true;
+                        break;
                     case PlayerStates.TRANSFORM:
                         anim.Play("Player_Transform");
                         stateLock = true;
@@ -95,42 +166,80 @@ public class Player : MonoBehaviour
 
     private PlayerStates currentState;
 
-    [SerializeField] private float moveSpeed = 5f;
-
     private void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        rb = GetComponentInParent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         currentShapeshift = "default";
         currentData = DefaultFormData;
         moveSpeed = currentData.speed;
+        playerCombat = GetComponent<PlayerCombat>();
     }
 
     private void Update()
     {
-        
-    }
+        if (moveInput.x > 0.1f && moveInput.y == 0)
+        {
+            facingDirection = "right";
+        }
 
+        else if (moveInput.x < -0.1f && moveInput.y == 0)
+        {
+            facingDirection = "left";
+        }
+
+        else if (moveInput.x == 0 && moveInput.y > 0.1f)
+        {
+            facingDirection = "up";
+        }
+
+        else if (moveInput.x == 0 && moveInput.y < -0.1f)
+        {
+            facingDirection = "down";
+        }
+    }
     private void FixedUpdate()
     {
-        if (!isInputFreeze) {
+
+        if (!isInputFreeze && !isDashing && !isKnockedback) {
             rb.MovePosition(rb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
             ResetAnimator();
-        }
+        }   
     }
 
-    public void ExitAttackMode()
+    private IEnumerator Dash()
     {
+        canDash = false;
+        HandleDashingAnimation();
+        isDashing = true;
+        rb.velocity = new Vector2(moveInput.x * dashingPower, moveInput.y * dashingPower);
+        yield return new WaitForSeconds(dashingTime);
+        OnExitDash.Raise();
+        isDashing = false;
         stateLock = false;
-        DisableInputFreeze();
+        rb.velocity = Vector2.zero;
+        ResetAnimator();
+        yield return new WaitForSeconds(dashingCooldown);
+        canDash = true;
         
-        if (moveInput != Vector2.zero)
+    }
+
+    private void HandleDashingAnimation()
+    {
+        switch (facingDirection)
         {
-            CurrentState = PlayerStates.WALK;
-        }
-        else
-        {
-            CurrentState = PlayerStates.IDLE;
+            case "right":
+                CurrentState = PlayerStates.DASH_RIGHT;
+                break;
+            case "left":
+                CurrentState = PlayerStates.DASH_LEFT;
+                break;
+            case "up":
+                CurrentState = PlayerStates.DASH_UP;
+                break;
+            case "down":
+                CurrentState = PlayerStates.DASH_DOWN;
+                break;
         }
     }
 
@@ -139,28 +248,9 @@ public class Player : MonoBehaviour
         moveInput = value.Get<Vector2>();
     }
 
-    public void UpdateAnimatorMoveInput()
-    {
-        anim.SetFloat("MoveX", moveInput.x);
-        anim.SetFloat("MoveY", moveInput.y);
-    }
-
-    private void ResetAnimator()
-    {
-        if (moveInput != Vector2.zero)
-        {
-            CurrentState = PlayerStates.WALK;
-            UpdateAnimatorMoveInput();
-        }
-        else
-        {
-            CurrentState = PlayerStates.IDLE;
-        }
-    }
-
     void OnShapeshift(InputValue value)
     {
-        if (isInputFreeze)
+        if (isInputFreeze || stateLock)
         {
             return;
         }
@@ -181,6 +271,103 @@ public class Player : MonoBehaviour
 
         moveSpeed = currentData.speed;
         EnableInputFreeze();
+    }
+
+    void OnDash(InputValue value)
+    {
+        if (canDash && !stateLock)
+        {
+            StartCoroutine(Dash());
+        }
+    }
+
+    public void ExitAttackMode()
+    {
+        if (currentState == PlayerStates.TRANSFORM)
+        {
+            return;
+        }
+
+        stateLock = false;
+        DisableInputFreeze();
+
+        if (moveInput != Vector2.zero)
+        {
+            CurrentState = PlayerStates.WALK;
+        }
+        else
+        {
+            CurrentState = PlayerStates.IDLE;
+        }
+    }
+
+    public void UpdateAnimatorMoveInput(Vector2 input)
+    {
+        anim.SetFloat("MoveX", input.x);
+        anim.SetFloat("MoveY", input.y);
+    }
+
+    private void ResetAnimator()
+    {
+        if (!stateLock)
+        {
+            if (moveInput != Vector2.zero)
+            {
+                CurrentState = PlayerStates.WALK;
+                UpdateAnimatorMoveInput(moveInput);
+
+            }
+            else
+            {
+                CurrentState = PlayerStates.IDLE;
+            }
+        }
+    }
+
+    public void ApplyKnockback(Component sender, object data)
+    {
+        isKnockedback = true;
+        Vector3 enemyPosition = (Vector3) data;
+        //HitDirection
+        Vector2 direction = (transform.parent.position - enemyPosition).normalized;
+        Debug.Log(direction);
+        //Apply Knockback
+        knockbackForce = (direction * knockbackAmount);
+        StartCoroutine(Knockback(knockbackForce));
+        //rb.velocity = new Vector2 (knockbackForce.x, knockbackForce.y);
+    }
+
+    private void HandleHurtAnimation()
+    {
+        switch (facingDirection)
+        {
+            case "right":
+                CurrentState = PlayerStates.HURT_RIGHT;
+                break;
+            case "left":
+                CurrentState = PlayerStates.HURT_LEFT;
+                break;
+            case "up":
+                CurrentState = PlayerStates.HURT_UP;
+                break;
+            case "down":
+                CurrentState = PlayerStates.HURT_DOWN;
+                break;
+        }
+        
+    }
+
+    private IEnumerator Knockback(Vector2 knockbackForce)
+    {
+        HandleHurtAnimation();
+        isKnockedback = true;
+        rb.AddForce(knockbackForce, ForceMode2D.Impulse);
+        yield return new WaitForSeconds(knockbackTime);
+        OnExitKnockback.Raise();
+        isKnockedback = false;
+        stateLock = false;
+        rb.velocity = Vector2.zero;
+        ResetAnimator();
     }
 
     public void Shapeshift()

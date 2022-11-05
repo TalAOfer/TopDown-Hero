@@ -8,6 +8,8 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private Enemy_SO EnemyData;
 
+    public bool isDead = false;
+
     private int maxHealth,
                 currentHealth;
 
@@ -32,7 +34,11 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(int damage, Vector3 playerPosition)
     {
-        Debug.Log(damage);
+        if (isDead)
+        {
+            return;
+        }
+
         currentHealth -= damage;
 
         anim.SetTrigger("Hurt");
@@ -40,20 +46,24 @@ public class Enemy : MonoBehaviour
         //HitDirection
         Vector2 direction = (this.transform.position - playerPosition).normalized;
         //Apply Knockback
-        force = (direction * knockbackAmount * (damage / 2));
-        rb.AddForce(force, ForceMode2D.Impulse);
-
-        if (currentHealth < 0) {
-            Die();
+        if (currentHealth > 0)
+        {
+            force = (direction * knockbackAmount * (damage / 2));
+            rb.AddForce(force, ForceMode2D.Impulse);
+        } else
+        {
+            StartCoroutine(Die());
         }
     }
 
 
 
-    private void Die()
+    private IEnumerator Die()
     {
+        isDead = true;
         anim.SetBool("isDead", true);
-
+        rb.constraints = RigidbodyConstraints2D.FreezePosition;
+        yield return new WaitForSeconds(1);
         this.gameObject.SetActive(false);
 
         GetComponent<Collider2D>().enabled = false;
