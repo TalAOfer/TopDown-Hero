@@ -330,7 +330,6 @@ public class Player : MonoBehaviour
         Vector3 enemyPosition = (Vector3) data;
         //HitDirection
         Vector2 direction = (transform.parent.position - enemyPosition).normalized;
-        Debug.Log(direction);
         //Apply Knockback
         knockbackForce = (direction * knockbackAmount);
         StartCoroutine(Knockback(knockbackForce));

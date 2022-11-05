@@ -25,11 +25,20 @@ public class PatrolEnemy : MonoBehaviour
 
     private void Start()
     {
+        startingPosition = transform.position;
+        InitPartol();
+    }
+
+    private void OnEnable()
+    {
+       InitPartol();
+    }
+
+    private void InitPartol()
+    {
         anim = GetComponent<Animator>();
         enemy = GetComponent<Enemy>();
-
-        startingPosition = transform.position;
-        roamTargetPosition = GetNextRoamingPosition();
+        roamTargetPosition = startingPosition;
         HandleWalkingAnimation();
     }
 
@@ -113,7 +122,7 @@ public class PatrolEnemy : MonoBehaviour
 
     private void HandleIdleAnimation()
     {
-        if (enemy.isDead)
+        if (enemy.isDead && !enemy.stateLock)
         {
             return;
         }

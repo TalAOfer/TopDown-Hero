@@ -12,6 +12,7 @@ public class OnCollisionDamage : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!enemy) return;
         if (!enemy.isDead)
         {
             if (collision.gameObject.CompareTag("Player"))
